@@ -1,0 +1,158 @@
+#App
+
+Gympass Style app.
+
+## RFs (Requisitos Funcionais) -> Funcionalidade 
+
+- [x] Deve ser possivel se cadastrar;
+- [x] Deve ser possivel se Autenticar;
+- [x] Deve ser possivel obter o perfil de um usuario logado;
+- [x] Deve ser possivel obter o numero de check-ins realizados pelo usuario logado;
+- [x] Deve ser possivel o usuario obter seu historico de check-ins;
+- [x] Deve ser possivel o usuario buscar academias proximas (max 10km);
+- [x] Deve ser possivel o usuario buscar academias pelo nome;
+- [x] Deve ser possivel o usuario realizar check-in em uma academia;
+- [x] Deve ser possivel validar o check-in de um usuario;
+- [x] Deve ser possivel cadastrar uma academia;
+
+## RNs (Regras de Negocio) -> 
+
+- [x] O usuario nao deve poder se cadastrar com o email duplicado;
+- [x] O usuario nao pode fazer 2 check-ins no mesmo dia;
+- [x] O usuario nao pode fazer check-in se nao estiver perto (100m) da academia;
+- [x] O check-in so pode ser validado ate 20 min apos criado;
+- [x] O check-in so pode ser validado por administradores;
+- [x] A academia so pode ser cadastrado por administradores;
+
+## RNFs (Requisitos Nao Funcionais) -> Qual bando de dados? Qual estrategia da aplicacao? Coisas mais tecnicas
+
+- [x] A senha do usuario precisa estar criptografada;
+- [x] Os dados da aplicacao precisam estar persistidos em um banco PostgreSQL;
+- [x] Todas as listas de dados precisam estar paginadas com 20 items por pagina;
+- [x] O usuario deve ser identificado por um JWT;
+
+## Primeiros comandos
+
+- npm init -y
+- npm i typescript @types/node tsx tsup -D  // Instala o typescript, tsx (biblioteca usada para executar o codigo typescript pois o node nao entende ts), tsup ( Biblioteca utilizada na criacao da build da aplicacao, para quando colocar o projeto em producao o codigo ts seja convertido para js)
+- npx tsc --init (Cria o tsconfig.json)
+- npm i fastify
+- npm i dotenv (Biblioteca usada para ler o arquivo .env e transformar em variaveis ambiente dentro do node)
+- npm i zod
+- npm i eslint @rocketseat/eslint-config -D
+- 
+- npm i prisma -D 
+    - npx prisma init
+    - npx prisma generate, cria uma forma automatica de tipagem do schema, que seria a integracao do typescript para que o codiga entenda que existe a tabela criada, e que ela tem os campos inseridos.
+    - npx prisma migrate dev, le o arquivo schema.prima, compara com o banco de dados que esta rodando, ve as alteracao que nao foram criadas e insere no banco (tabelas, colunas). USAR QUANDO PRECISAR FAZER ALGUMA ALTERACAO NO BANCO
+    - npx prisma studio - mostra o banco no navegador
+-npm i @prisma/client, usada para acessar o banco de dados
+
+-npm i bcryptjs, umas das bibliotecas mais famosas para fazer hashing de senhas
+-npm i -D @types/bcryptjs, por nao ser uma biblioteca feita em typescript é necessario fazer essa instalação
+
+-npm i vitest vite-tsconfig-paths -D // intalando o vitest com com um plugin para o vitest entender as configurações de paths feitas no tsconfig.js
+-npm i -D@vitest/ui
+-npm run test:covarage // O Coverage é uma métrica utilizada para medir a quantidade de código que está sendo testado em uma aplicação.
+
+-npm i dayjs -> biblioteca para trabalhar com datas
+
+-npm i @fastify/jwt
+
+- npm init -y (dentro da pasta vitest-environment-prisma)
+- npm link (dentro da pasta vitest-environment-prisma) -> cria um link para pode instalar no pacote global
+- npm link vitest-environment-prisma (dentro da pasta global gympass-api-solid>)
+
+- npm install -D npm-run-all -> serve para executar os scripts do package.json independete do sistema operacional ("run-s test:create-prisma-environment test:install-prisma-environment" -> run-s executa o npm run-all)
+
+-npm i supertest -D -> biblioteca mais usada para fazer as requisicoes http do teste para a aplicacao, sem precisar subir a aplicacao  
+-npm i @types/supertest -D -> instala os tipos e dependencias
+-npm i @fastify/cookie -> sera utilizado cookie para passar o refresh token para o frontend
+## Criando um container no terminal com docker
+- dockler run --name api-gympass-pg -e POSTGRESQL_USERNAME=docker -e POSTGRESQL_PASSWORD=docker -e POSTGRESQL_DATABASE=apisolid -p 5432:5432 bitnami/postgresql
+- docker compose up -d
+
+## Utils
+- (ALIAS DE IMPORTACAO) No tsconfig.js, descomentar e aplicar esses comandos:
+    "baseUrl": "./",                                  
+    "paths": {
+        "@/*": ["./src/*"]
+    },
+    Torna possivel importar utilizando apenas @/nomedoarquivo, sem precisar utilizar ../../ para voltar pastas
+
+- No settings.json, aplicar esses comandos para quando salvar arquivos prisma ocorrer uma formatação:    
+    "[prisma]": {
+    "editor.formatOnSave": true
+    }
+- No setting.json colocar esse comando para configurar o eslint
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint":"explicit"
+    },
+
+#Patterns
+- Vantagens de usar Repository Pattern:
+    - Uma das vantagens de se usar Repository Pattern é poder separar os codigos de banco de dados especificos de uma so ferramenta (Prisma) em arquivos, pois
+    no futuro caso o desenvolvedor queira utilizar outra ferramenta (exemplo TypeORM), somente o arquivos da pasta repositories são os arquivos 
+    que o desenvolvedor irá precisar mexer para migrar de ferramenta.
+- Vantagens de usar Factory Pattern:
+    - Abstrair a criação de objetos sem expor a lógica de criação beneficiando a reutilização
+    - Uma das vantagens de usar o Factory Pattern é para poder centralizar as dependencias de um caso de uso (make-register-use-case.ts), ou seja, sempre que tiver um codigo
+    na aplicacao e esse codigo vai ser utilizado em varias partes de aplicação e esse código possui varias dependencias, pode ser utilizado o Factory para centralizar. 
+
+#SOLID
+- D -> Inversao de Dependecia, ao inves de uma classe instanciar uma dependecia (nesse caso, o caso de uso register 
+  depende do prismaUserRepository para funcionar), a classe ira receber por parametro as dependecias que ela precisa, atraves de um construtor.
+
+#TESTE UNITARIO 
+- Teste Unitario nunca vai acessar camadas externas da aplicação, como banco de dados
+
+#TESTE END-TO-END
+- Teste EndToEnd deve testar a aplicacao como se fosse um usuario, deve acessar o banco de dados
+- Ter um banco separado para testes
+- Poucos testes, apenas para garantir que o fluxo/rotas da aplicacao estao funcionando.
+#Clean-Code
+- Ao criar variaveis booleanas sempre começar a nomenclatura com "if" "has" "does", para ficar mais descritivo, exemplo -> const doesPasswordMatches = true
+
+#TDD
+- Faz o teste primeiro e dps a funcionalidade:
+    - Fluxo do TDD -> Red, green, refactor
+    - Red: Significa Erro no teste, quando a funcionalidade ainda nao esta implementada
+    - Green: Codar o minimo possivel da funcionalidade para fazer o teste passar
+    - Refactor: Refatora o codigo, melhora.
+
+#JWT -> JSON WEB TOKEN
+- Usuário faz login, envia email/senha, o back-end cria um token ÚNICO, não-modificavel, STATELESS
+- Stateless: Não armazena/salva nenhuma estrutura de banco de dados
+- Back-end: Quando o back-end cria o token ele usa uma PALAVRA-CHAVE(string, que pode ser qualquer coisa que você escolher) assim com essa palavra chave o token criado é unico
+    e como o back-end é detentor da palavra chave ela sempre sera unica
+- Exemplo de Palavra Chave: asikdjadqpowpadslakdj1das
+- O token jwt é composto por 3 coisas -> header.payload.sign
+- JWT - Sera usado em todas as requisicoes 
+- Utilizado em 99% das vezes em rotas http, ou seja, quando o front-end quer se comunicar com o back-end
+
+# RBAC -> (Role-Based Access Control) eh um controle de autorização baseado no cargo que o usuario tem 
+#Boas Praticas
+- Ao mexer com datas em testes é uma boa pratica utilizar Mocking (Mocking seria criar valores ficticios), uma técnica para simular a execução de funções ou objetos.
+- Ao utilizar mock, sempre lembrar de resetar vi.useRealTimers()
+- Na pasta use-cases, arquivos com o nome começados com get, buscam apenas uma informação, arquivos com nomes começados com fetch, buscam mais informações (lista)
+
+
+# QUIZ
+- Qual o fator de custo no Bcrypt -> O número de iterações usadas na função de hash
+- O que é um "salt" no contexto de hashing de senha -> Um valor aleatório adicionado à senha antes de gerar o hash
+- Ao utilizar um interface para um repositorio, é correto afirmar que -> Nossa aplicação dependerá de uma abstração e isso a tornará mais flexível e menos acoplada
+- Para que serve o padrão Repository? -> Para abstrair a persistência de dados
+- Quais as principais responsabilidades dos Controller? -> Intermediar a requisição, repassar os dados para os casos de uso e retornar dados quando necessário.
+- Para que servem os casos de uso? -> Para orquestrar as entidades e regras da aplicação
+- O que é um "falso" InMemoryTestDataBase? - Um banco de dados que armazena os dados em memória, mas também usa o disco para armazenar os dados permanentemente
+- Para que serve a Controller? -> Serve para fornecer um meio de acesso externo para a funcionalidade(caso de uso)
+- Seguindo a aula, em qual fase do ciclo de vida dos testes unitários deve ocorrer a limpeza do contexto? -> Antes de cada teste
+- Para que serve o padrão Factory Pattern? -> Para abstrair a criação de objetos sem expor a lógica de criação beneficiando a reutilização
+- Qual é o formato padrão de um JWT? -> Um conjunto de pares chave-valor codificado em base64
+- Qual é a melhor forma de garantir a segurança de um JWT? -> Utilizar uma chave secreta forte para assinar e verificar a assinatura do token
+- Qual é o risco de expor a chave secreta usada para assinar um JWT? -> Um atacante pode criar tokens falsos e se passar pelo usuário autenticado
+- Qual o principal motivo de ser criado um Test Environment? -> Isolar o banco de dados para cada grupo de testes
+- O que é um Refresh Token? -> Um token usado para solicitar um novo Access Token sem precisar fazer login novamente.
+- Qual é a principal vantagem do uso de Refresh Tokens em uma aplicação? -> Permitir que o usuário permaneça conectado por períodos mais longos sem precisar digitar suas credenciais novamente.
+- O que acontece se um Refresh Token expirar? -> O usuário deve fazer login novamente.
+- Como um Refresh Token é diferente de um Access Token? -> Um Refresh Token é usado para solicitar um novo Access Token, enquanto um Access Token é usado para acessar recursos do aplicativo. 

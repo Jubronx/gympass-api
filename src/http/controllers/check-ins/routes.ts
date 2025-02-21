@@ -1,0 +1,18 @@
+import { FastifyInstance } from 'fastify'
+
+import { verifyJWT } from '../../middlewares/verify-jwt'
+import { createController } from './create-controller'
+import { validateController } from './validate-controller'
+import { historyController } from './history-controller'
+import { metricsController } from './metrics-controller'
+import { verifyUserRole } from '@/http/middlewares/verify-user-role'
+
+export async function checkInsRoutes(app: FastifyInstance) {
+  app.addHook('onRequest', verifyJWT) // Todas as rotas que estiverem dentreo desse arquivo de rotas vao chamar o middleware verifyJWT
+
+  app.get('/check-ins/history', historyController)
+  app.get('/check-ins/metrics', metricsController)
+
+  app.post('/gyms/:gymId/check-ins', createController)
+  app.patch('/check-ins/:checkInId/validate', {onRequest: [verifyUserRole('ADMIN')]} ,validateController) // patch pq queremos validar apenas uma informacao
+}

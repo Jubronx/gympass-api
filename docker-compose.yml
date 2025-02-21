@@ -1,0 +1,11 @@
+version : '3'
+
+services: 
+  api-gympass-pg:
+    image: bitnami/postgress
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRESS_USERNAME=docker
+      - POSTGRESS_PASSWORD=docker
+      - POSTGRESS_DATABASE=api-gympass-pg     
