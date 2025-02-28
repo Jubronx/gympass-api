@@ -8,4 +8,4 @@ services:
     environment:
       - POSTGRESS_USERNAME=docker
       - POSTGRESS_PASSWORD=docker
-      - POSTGRESS_DATABASE=api-gympass-pg     
+      - POSTGRESS_DATABASE=api-gympass-pg
